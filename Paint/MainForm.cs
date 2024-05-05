@@ -1,5 +1,9 @@
-﻿using System;
+﻿using PluginInterface;
+using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace Paint
@@ -13,6 +17,8 @@ namespace Paint
         public static int n { get; set; }
         public static float RadiusRatio { get; set; }
 
+        Dictionary<string, IPlugin> plugins = new Dictionary<string, IPlugin>();
+
         public MainForm()
         {
             InitializeComponent();
@@ -24,6 +30,61 @@ namespace Paint
 
             n = 5;
             RadiusRatio = 0.4f;
+
+            FindPlugins();
+            CreatePluginsMenu();
+        }
+
+        void FindPlugins()
+        {
+            string folder = AppDomain.CurrentDomain.BaseDirectory;
+
+            string[] files = Directory.GetFiles(folder, "*.dll");
+
+            foreach (string file in files)
+            {
+                try
+                {
+                    Assembly assembly = Assembly.LoadFile(file);
+
+                    foreach (Type type in assembly.GetTypes())
+                    {
+                        Type iface = type.GetInterface("PluginInterface.IPlugin");
+
+                        if (iface != null)
+                        {
+                            IPlugin plugin = (IPlugin)Activator.CreateInstance(type);
+                            plugins.Add(plugin.Name, plugin);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Ошибка загрузки плагина\n" + ex.Message);
+                }
+            }
+        }
+
+        private void CreatePluginsMenu()
+        {
+            foreach (var p in plugins)
+            {
+                var item = фильтрыToolStripMenuItem.DropDownItems.Add(p.Value.Name);
+                item.Click += OnPluginClick;
+            }
+        }
+
+        private void OnPluginClick(object sender, EventArgs args)
+        {
+            DocumentForm activeDocumentForm = ActiveMdiChild as DocumentForm;
+
+            IPlugin plugin = plugins[((ToolStripMenuItem)sender).Text];
+            plugin.Filtered += (s, e) =>
+            {
+                activeDocumentForm.Invalidate();
+                activeDocumentForm.changed = true;
+            };
+            plugin.Transform(activeDocumentForm.bitmap);
         }
 
         private void выходToolStripMenuItem_Click(object sender, EventArgs e)

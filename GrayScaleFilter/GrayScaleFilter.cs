@@ -11,6 +11,8 @@ namespace GrayScaleFilter
 
         public string Author => "Леонтьев Максим";
 
+        public event EventHandler Filtered;
+
         public void Transform(Bitmap bitmap)
         {
             for (int i = 0; i < bitmap.Width; i++)
@@ -22,6 +24,7 @@ namespace GrayScaleFilter
                     bitmap.SetPixel(i, j, Color.FromArgb(gray, gray, gray));
                 }
             }
+            Filtered?.Invoke(this, EventArgs.Empty);
         }
     }
 }

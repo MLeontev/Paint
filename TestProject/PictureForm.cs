@@ -64,8 +64,11 @@ namespace TestProject
         private void OnPluginClick(object sender, EventArgs args)
         {
             IPlugin plugin = plugins[((ToolStripMenuItem)sender).Text];
+            plugin.Filtered += (s, e) =>
+            {
+                pictureBox.Refresh();
+            };
             plugin.Transform((Bitmap)pictureBox.Image);
-            pictureBox.Refresh();
         }
 
 
@@ -134,13 +137,14 @@ namespace TestProject
                         {
                             PointF coordLocation = new PointF(bitmap.Width - 150, bitmap.Height - 25);
                             g.DrawString($"{coord.Latitude}; {coord.Longitude}", new Font("Arial", 12), Brushes.DarkOrange, coordLocation);
-                            pictureBox.Refresh();
                         }
                     }
                 }
             };
 
             watcher.Start();
+
+            pictureBox.Refresh();
         }
     }
 }

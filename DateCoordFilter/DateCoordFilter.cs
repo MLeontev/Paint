@@ -5,11 +5,14 @@ using System.Device.Location;
 
 namespace DateCoordFilter
 {
+    [Version(1, 0)]
     public class DateCoordFilter : IPlugin
     {
         public string Name => "Добавить дату и координаты";
 
         public string Author => "Леонтьев Максим";
+
+        public event EventHandler Filtered;
 
         public void Transform(Bitmap bitmap)
         {
@@ -18,6 +21,7 @@ namespace DateCoordFilter
                 string date = DateTime.Now.ToString("d");
                 PointF dateLocation = new PointF(bitmap.Width - 150, bitmap.Height - 45);
                 g.DrawString(date, new Font("Arial", 12), Brushes.DarkOrange, dateLocation);
+                Filtered?.Invoke(this, EventArgs.Empty);
             }
 
             GeoCoordinateWatcher watcher = new GeoCoordinateWatcher();
@@ -35,6 +39,7 @@ namespace DateCoordFilter
                         }
                     }
                 }
+                Filtered?.Invoke(this, EventArgs.Empty);
             };
 
             watcher.Start();

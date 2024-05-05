@@ -4,11 +4,14 @@ using System.Drawing;
 
 namespace MedianFilter
 {
+    [Version(1, 0)]
     public class MedianFilter : IPlugin
     {
         public string Name => "Матричный медианный фильтр";
 
         public string Author => "Леонтьев Максим";
+
+        public event EventHandler Filtered;
 
         public void Transform(Bitmap bitmap)
         {
@@ -62,6 +65,7 @@ namespace MedianFilter
                     bitmap.SetPixel(x, y, newPoints[x, y]);
                 }
             }
+            Filtered?.Invoke(this, EventArgs.Empty);
         }
     }
 }

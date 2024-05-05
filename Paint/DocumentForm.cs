@@ -9,10 +9,10 @@ namespace Paint
     public partial class DocumentForm : Form
     {
         private int x, y;
-        private Bitmap bitmap;
+        public Bitmap bitmap;
 
         private bool isDrawing;
-        private bool changed;
+        public bool changed;
 
         private Point startPoint;
 
